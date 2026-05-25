@@ -198,20 +198,22 @@ class MinesweeperAI():
         self.mark_safe(cell)
         
         # 3) Add a new sentence based on the cell and count
-        # Get all neighboring cells that are not yet known
-        neighbors = set()
+        # Get all neighboring cells
         i, j = cell
+        neighbors = set()
         for di in range(-1, 2):
             for dj in range(-1, 2):
                 if di == 0 and dj == 0:
                     continue
                 ni, nj = i + di, j + dj
-                neighbor = (ni, nj)
-                # Only include if in bounds, not a mine, not safe, and not already moved
-                if (0 <= ni < self.height and 0 <= nj < self.width and
-                    neighbor not in self.mines and neighbor not in self.safes and
-                    neighbor not in self.moves_made):
-                    neighbors.add(neighbor)
+                if 0 <= ni < self.height and 0 <= nj < self.width:
+                    neighbor = (ni, nj)
+                    # Known mines: exclude from sentence, adjust count
+                    if neighbor in self.mines:
+                        count -= 1
+                    # Known safe or already moved: exclude from sentence
+                    elif neighbor not in self.safes and neighbor not in self.moves_made:
+                        neighbors.add(neighbor)
         
         # Add the new sentence if there are unknown neighbors
         if neighbors:
