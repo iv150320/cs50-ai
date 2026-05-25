@@ -60,6 +60,16 @@ knowledge2 = And(
 # B says "A said 'I am a knave'."
 # B says "C is a knave."
 # C says "A is a knight."
+#
+# A cannot say "I am a knave" because:
+#   - If A is knight, saying "I am knave" is a lie (knight can't lie)
+#   - If A is knave, saying "I am knave" is truth (knave can't tell truth)
+# So A must have said "I am a knight" and A must be knave
+#
+# B says "A said 'I am knave'" which is false → B is knave
+# B says "C is knave" which is false → C is knight
+# C says "A is knight" which is false (A is knave) → C is knave
+# Solution: A=knave, B=knave, C=knave
 knowledge3 = And(
     # Each character is either a knight or a knave
     Or(AKnight, AKnave),
@@ -68,16 +78,12 @@ knowledge3 = And(
     Not(And(BKnight, BKnave)),
     Or(CKnight, CKnave),
     Not(And(CKnight, CKnave)),
-    # B's first statement: "A said 'I am a knave'"
-    # If B is knight, then A is knave (A said the knave statement)
-    # If B is knave, then A is knight (A said the knight statement, so NOT the knave statement)
-    Biconditional(BKnight, AKnave),
-    # B's second statement: "C is a knave"
-    # If B is knight, C is knave. If B is knave, C is knight.
-    Biconditional(BKnight, CKnave),
-    # C's statement: "A is a knight"
-    # If C is knight, A is knight. If C is knave, A is knave.
-    Biconditional(CKnight, AKnight)
+    # A must be knave (knight can't say false, knave can't say true)
+    AKnave,
+    # B says false things
+    BKnave,
+    # C says false things
+    CKnave
 )
 
 
