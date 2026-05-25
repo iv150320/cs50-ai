@@ -1,3 +1,4 @@
+import os
 import sys
 import torch
 from transformers import AutoTokenizer, AutoModelForMaskedLM
@@ -11,7 +12,11 @@ MODEL = "bert-base-uncased"
 K = 3
 
 # Constants for generating attention diagrams
-FONT = ImageFont.truetype("assets/fonts/OpenSans-Regular.ttf", 28)
+FONT_PATH = os.path.join(os.path.dirname(__file__), "assets", "fonts", "OpenSans-Regular.ttf")
+try:
+    FONT = ImageFont.truetype(FONT_PATH, 28)
+except (OSError, IOError):
+    FONT = ImageFont.load_default()
 GRID_SIZE = 40
 PIXELS_PER_WORD = 200
 

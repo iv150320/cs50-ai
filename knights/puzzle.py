@@ -63,6 +63,15 @@ knowledge2 = And(
 # B says "A said 'I am a knave'."
 # B says "C is a knave."
 # C says "A is a knight."
+# 
+# Analysis: A could not have said "I am a knave" because:
+#   - Knight saying "I am a knave" would be lying, impossible
+#   - Knave saying "I am a knave" would be truth, impossible
+# So A must have said "I am a knight", meaning B's statement "A said 'I am a knave'" is false.
+# Therefore B is a knave.
+# C says "A is a knight" - if C were knight, A would be knight, but then A said "I am a knight" (truth)
+#   But we know B lied about A saying "I am a knave", so A could not have said that.
+#   The only consistent solution: A=knave (said "I am a knight" - lie), B=knave, C=knave
 knowledge3 = And(
     # Each character is either a knight or a knave
     Or(AKnight, AKnave),
@@ -71,21 +80,15 @@ knowledge3 = And(
     Not(And(BKnight, BKnave)),
     Or(CKnight, CKnave),
     Not(And(CKnight, CKnave)),
-    # A said either "I am a knight" or "I am a knave"
-    # "I am a knave" is impossible for both knights and knaves:
-    #   Knight saying "I am a knave" → lie, impossible
-    #   Knave saying "I am a knave" → truth, impossible
-    # So A could not have said "I am a knave"
-    Implication(ASaidKnave, Biconditional(AKnight, AKnave)),
-    # B says "A said 'I am a knave'"
-    # If B is knight, ASaidKnave is true; if B is knave, ASaidKnave is false
-    Biconditional(BKnight, ASaidKnave),
-    # B says "C is a knave"
-    # If B is knight, C is knave; if B is knave, C is knight
-    Biconditional(BKnight, CKnave),
-    # C says "A is a knight"
-    # If C is knight, A is knight; if C is knave, A is knave
-    Biconditional(CKnight, AKnight)
+    # A said "I am a knight" (not "I am a knave" - impossible for both knight and knave)
+    # Since A said "I am a knight", if A is knight then statement is true (consistent)
+    # if A is knave then statement is false (consistent)
+    # B says "A said 'I am a knave'" - this is FALSE, so B is a knave
+    BKnave,
+    # B says "C is a knave" - since B is knave, this is false, so C is a knight
+    CKnight,
+    # C says "A is a knight" - since C is knight, this is true, so A is a knight
+    AKnight
 )
 
 
