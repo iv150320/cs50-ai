@@ -91,8 +91,12 @@ def np_chunk(tree):
     for subtree in tree.subtrees():
         # Check if this is an NP
         if subtree.label() == "NP":
-            # Check if it contains any other NP subtrees
-            has_np_child = any(child.label() == "NP" for child in subtree)
+            # Check if it contains any other NP as a descendant subtree
+            has_np_child = any(
+                sub.label() == "NP"
+                for sub in subtree.subtrees()
+                if sub is not subtree
+            )
             if not has_np_child:
                 chunks.append(subtree)
     
