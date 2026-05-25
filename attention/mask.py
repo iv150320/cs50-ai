@@ -23,9 +23,6 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(MODEL)
     model = AutoModelForMaskedLM.from_pretrained(MODEL, output_attentions=True)
     
-    # Set attention to eager mode to support output_attentions
-    model.config.eager_mode = True
-    
     inputs = tokenizer(text, return_tensors="pt")
     mask_token_index = get_mask_token_index(tokenizer.mask_token_id, inputs)
     if mask_token_index is None:
