@@ -10,6 +10,7 @@ CKnight = Symbol("C is a Knight")
 CKnave = Symbol("C is a Knave")
 
 # Puzzle 3 symbols
+ASaidKnight = Symbol("A said 'I am a knight'")
 ASaidKnave = Symbol("A said 'I am a knave'")
 
 # Puzzle 0
@@ -63,15 +64,6 @@ knowledge2 = And(
 # B says "A said 'I am a knave'."
 # B says "C is a knave."
 # C says "A is a knight."
-# 
-# Analysis: A could not have said "I am a knave" because:
-#   - Knight saying "I am a knave" would be lying, impossible
-#   - Knave saying "I am a knave" would be truth, impossible
-# So A must have said "I am a knight", meaning B's statement "A said 'I am a knave'" is false.
-# Therefore B is a knave.
-# C says "A is a knight" - if C were knight, A would be knight, but then A said "I am a knight" (truth)
-#   But we know B lied about A saying "I am a knave", so A could not have said that.
-#   The only consistent solution: A=knave (said "I am a knight" - lie), B=knave, C=knave
 knowledge3 = And(
     # Each character is either a knight or a knave
     Or(AKnight, AKnave),
@@ -80,20 +72,23 @@ knowledge3 = And(
     Not(And(BKnight, BKnave)),
     Or(CKnight, CKnave),
     Not(And(CKnight, CKnave)),
-    # A said "I am a knight" (not "I am a knave" - impossible for both knight and knave)
-    # Since A said "I am a knight", if A is knight then statement is true (consistent)
-    # if A is knave then statement is false (consistent)
-    # B says "A said 'I am a knave'" - this is FALSE, so B is a knave
-    BKnave,
-    # B says "C is a knave" - since B is knave, this is false, so C is a knight
-    CKnight,
-    # C says "A is a knight" - since C is knight, this is true, so A is a knight
-    AKnight
+    # A said exactly one of "I am a knight" or "I am a knave"
+    Or(ASaidKnight, ASaidKnave),
+    Not(And(ASaidKnight, ASaidKnave)),
+    # If A said "I am a knave", then A is a knight iff A is a knave (impossible)
+    # This constraint forces ASaidKnave to be false
+    Implication(ASaidKnave, Biconditional(AKnight, AKnave)),
+    # B says "A said 'I am a knave'"
+    Biconditional(BKnight, ASaidKnave),
+    # B says "C is a knave"
+    Biconditional(BKnight, CKnave),
+    # C says "A is a knight"
+    Biconditional(CKnight, AKnight)
 )
 
 
 def main():
-    symbols = [AKnight, AKnave, BKnight, BKnave, CKnight, CKnave, ASaidKnave]
+    symbols = [AKnight, AKnave, BKnight, BKnave, CKnight, CKnave, ASaidKnight, ASaidKnave]
     puzzles = [
         ("Puzzle 0", knowledge0),
         ("Puzzle 1", knowledge1),
