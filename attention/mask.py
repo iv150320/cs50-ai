@@ -1,7 +1,7 @@
 import os
 import sys
-import torch
-from transformers import AutoTokenizer, AutoModelForMaskedLM
+import tensorflow as tf
+from transformers import AutoTokenizer, TFAutoModelForMaskedLM
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -26,19 +26,19 @@ def main():
 
     # Tokenize input
     tokenizer = AutoTokenizer.from_pretrained(MODEL)
-    model = AutoModelForMaskedLM.from_pretrained(MODEL, output_attentions=True)
-    
-    inputs = tokenizer(text, return_tensors="pt")
+    model = TFAutoModelForMaskedLM.from_pretrained(MODEL, output_attentions=True)
+
+    inputs = tokenizer(text, return_tensors="tf")
     mask_token_index = get_mask_token_index(tokenizer.mask_token_id, inputs)
     if mask_token_index is None:
         sys.exit(f"Input must include mask token {tokenizer.mask_token}.")
 
     # Use model to process input
-    result = model(**inputs, output_attentions=True)
+    result = model(inputs, output_attentions=True)
 
     # Generate predictions
     mask_token_logits = result.logits[0, mask_token_index]
-    top_tokens = torch.topk(mask_token_logits, K).indices.numpy()
+    top_tokens = tf.math.top_k(mask_token_logits, K).indices.numpy()
     for token in top_tokens:
         print(text.replace(tokenizer.mask_token, tokenizer.decode([token])))
 
@@ -84,21 +84,21 @@ def visualize_attentions(tokens, attentions):
     if attentions is None:
         print("No attention weights available.")
         return
-    
+
     # attentions is a tuple of tensors with shape (num_layers, batch_size, num_heads, seq_len, seq_len)
     num_layers = len(attentions)
     num_heads = attentions[0].shape[1]
-    
+
     for layer_idx in range(num_layers):
         for head_idx in range(num_heads):
             # Layer and head numbers are 1-indexed
             layer_number = layer_idx + 1
             head_number = head_idx + 1
-            
+
             # Get attention weights for this layer and head
             # attentions[layer_idx] has shape (batch, heads, seq_len, seq_len)
             attention_weights = attentions[layer_idx][0][head_idx]
-            
+
             generate_diagram(
                 layer_number,
                 head_number,
